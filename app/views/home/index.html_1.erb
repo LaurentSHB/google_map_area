@@ -1,0 +1,48 @@
+<% content_for :current_page, :home %>
+<script src="http://maps.google.com/maps?file=api&v=2&key=
+        ABQIAAAAFw0lDRKsdCra15LPvIxvehS3Kl_ZRrzIrsFqDz8GBXIeW1O52xQh3P31Xg2eTvqFRAyuOMY4dQrRQw"
+type="text/javascript"></script>
+
+<script type="text/javascript">//<![CDATA[
+  function load()
+  {
+    if (GBrowserIsCompatible())
+    {
+      var map = new GMap2(document.getElementById("map"));
+      map.setCenter(new GLatLng (50.64086100717342, 3.044157028198242), 16);
+      // Initialisation de l'array "monpolygone" préchargé par le contenu des cordonnées des points délimitant le polygone
+      var monpolygone = new GPolygon([
+        new GLatLng(50.641895204617235, 3.0393075942993164),
+        new GLatLng(50.64286672501933, 3.0414533615112305),
+        new GLatLng(50.64331038529024, 3.04171085357666),
+        new GLatLng(50.64306545322356, 3.042783737182617),
+        new GLatLng(50.6443717428266, 3.0442428588867188),
+        new GLatLng(50.64314709738765, 3.045787811279297),
+        new GLatLng(50.643337599885506, 3.047010898590088),
+        new GLatLng(50.64257558526024, 3.0472683906555176),
+        new GLatLng(50.642085712190244, 3.0496931076049805),
+        new GLatLng(50.640806575098544, 3.0481696128845215),
+        new GLatLng(50.64019420991196, 3.0487489700317383),
+        new GLatLng(50.63997647814491, 3.0477404594421387),
+        new GLatLng(50.63895584704025, 3.047182559967041),
+        new GLatLng(50.63868367500226, 3.0457019805908203),
+        new GLatLng(50.6380984997833, 3.044736385345459),
+        new GLatLng(50.63852037102293, 3.044006824493408),
+        new GLatLng(50.63803045568031, 3.0417752265930176),
+        new GLatLng(50.63966348696253, 3.041367530822754),
+        new GLatLng(50.63999008640991, 3.0403804779052734),
+        new GLatLng(50.64057523807698, 3.0408740043640137),
+        new GLatLng(50.641895204617235, 3.0393075942993164)
+      ], "#990000", 1, 1, "#ff0000", 0.2);
+      // Affichage du polygone
+      map.addOverlay(monpolygone);
+    }
+  }
+  //]]></script>
+
+<body onload="load()" onunload="GUnload()">
+  <div id="map" style="width: 1000px; height: 800px"></div>
+</body>
+
+
+
