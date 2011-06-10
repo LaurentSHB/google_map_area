@@ -1,0 +1,19 @@
+
+<b>Liste de points</b><br>
+<% form_for  @area, :html => { :id => "area_form" } do |f| %>
+  Titre :<%= f.text_field :title %><br />
+  Description :<%= f.text_field :description %>
+  <%= f.hidden_field :points_list %>
+  <%#= f.select :description, [],{}, :id => "pointList", :size => "22", :onchange => "highlight(this.selectedIndex)", :ondblclick => "jumpToPoint()" %>
+  <select name="points_list" id="pointList" size="22" onchange="highlight(this.selectedIndex)" ondblclick="jumpToPoint()"></select><br>
+  <input type="button" value="Envoyer" onclick="sendPoints()" />
+<% end %>
+<input type="button" value="Efface un point sélectionné" onclick="deletePoint()" />
+<input type="button" value="Efface tous les points" onclick="deleteAllPoints()" />
+<% if !@area.id.blank? %>
+  <%= link_to "Supprimer le polygone", area_path(@area), :method => :delete, :confirm => "Etes-vous sûr de vouloir supprimer le polygone #{@area.title}" %>
+########################
+<%= @area.id %>
+########################
+<%= @area.get_str_points %>
+<% end %>

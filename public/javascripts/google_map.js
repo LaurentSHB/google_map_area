@@ -2,501 +2,421 @@ var points = [];
 var marker = null;
 var highlighted_marker = null;
 var point_markers = [];
-
+var map;
+var polyline;
+var areas = []
+var index_areas = []
+var search_point = null
 // Add a point to the points list.
 function addPoint() {
-  var lat = document.getElementById('txtLatitude').value;
-  var pLat = parseFloat(lat);
+    var lat = document.getElementById('txtLatitude').value;
+    var pLat = parseFloat(lat);
 
-  if (pLat.toString() != lat) {
-    alert('Invalid latitude entered. Must be in range of -90 to 90');
-    return;
-  }
+    if (pLat.toString() != lat) {
+        alert('Invalid latitude entered. Must be in range of -90 to 90');
+        return;
+    }
 
-  if (pLat < -90 || pLat > 90) {
-    alert('Invalid latitude entered. Must be in range of -90 to 90');
-    return;
-  }
+    if (pLat < -90 || pLat > 90) {
+        alert('Invalid latitude entered. Must be in range of -90 to 90');
+        return;
+    }
 
-  var lng = document.getElementById('txtLongitude').value;
-  var pLong = parseFloat(lng);
+    var lng = document.getElementById('txtLongitude').value;
+    var pLong = parseFloat(lng);
 
-  if (pLong.toString() != lng) {
-    alert('Invalid longitude entered. Must be in range of -180 to 180');
-    return;
-  }
+    if (pLong.toString() != lng) {
+        alert('Invalid longitude entered. Must be in range of -180 to 180');
+        return;
+    }
 
-  if (pLong < -180 || pLong > 180) {
-    alert('Invalid longitude entered. Must be in range of -180 to 180');
-    return;
-  }
+    if (pLong < -180 || pLong > 180) {
+        alert('Invalid longitude entered. Must be in range of -180 to 180');
+        return;
+    }
 
-  var level = document.getElementById('txtLevel').value;
-  var pLevel = parseInt(level);
+    var level = document.getElementById('txtLevel').value;
+    var pLevel = parseInt(level);
 
-  if (pLevel.toString() != level) {
-    alert('Invalid minimum level entered. Must be in range of 0 to 3');
-    return;
-  }
+    if (pLevel.toString() != level) {
+        alert('Invalid minimum level entered. Must be in range of 0 to 3');
+        return;
+    }
 
-  if (pLevel < 0 || pLevel > 3) {
-    alert('Invalid minimum level entered. Must be in range of 0 to 3');
-    return;
-  }
-
-  createPoint(lat, lng, pLevel);
-  createEncodings(false);
-  //var CoordPoint = '(' + point.Latitude + ','  + point.Longitude + ')';
-  //alert(CoordPoint);
-  //document.getElementById('ListeDePoints').value = CoordPoint;
+    if (pLevel < 0 || pLevel > 3) {
+        alert('Invalid minimum level entered. Must be in range of 0 to 3');
+        return;
+    }
+    createPoint(lat, lng, pLevel);
+    createEncodings(false);
+//var CoordPoint = '(' + point.Latitude + ','  + point.Longitude + ')';
+//alert(CoordPoint);
+//document.getElementById('ListeDePoints').value = CoordPoint;
 }
+
 
 // Returns the index of the marker in the polyline.
 function findMarkerIndex(point_marker) {
-  var index = -1;
+    var index = -1;
 
-  for (var  i = 0; i < point_markers.length; ++i) {
-    if (point_markers[i] == point_marker) {
-      index = i;
-      break;
+    for (var  i = 0; i < point_markers.length; ++i) {
+        if (point_markers[i] == point_marker) {
+            index = i;
+            break;
+        }
     }
-  }
 
-  return index;
+    return index;
 }
+
 
 // Creates a point and adds it to both the polyline and the list.
 function createPoint(lat, lng, pLevel) {
-  addPointItem(lat, lng, pLevel);
+    addPointItem(lat, lng, pLevel);
 
-  var newPoint = {
-    Latitude: lat,
-    Longitude: lng,
-    Level: pLevel
-  };
+    var newPoint = {
+        Latitude: lat,
+        Longitude: lng,
+        Level: pLevel
+    };
 
-  points.push(newPoint);
+    points.push(newPoint);
 
-  if (marker) {
-    document.map.removeOverlay(marker);
-    marker = null;
-  }
+    if (marker) {
+        marker.setMap(null);
+        marker = null;
+    }
 
-  var point_marker = createPointMarker(new GLatLng(lat, lng), false);
-  document.map.addOverlay(point_marker);
-  point_markers.push(point_marker);
+    var point_marker = createPointMarker(new google.maps.LatLng(lat, lng), false);
+    point_markers.push(point_marker);
 }
+
 
 // Creates a marker representing a point in the polyline.
 function createPointMarker(point, highlighted) {
-  var clr = highlighted ? "yellow" : "blue";
+        
+    var clr = highlighted ? "yellow" : "blue";
 
-  var point_marker = createMarker(point, clr);
-  point_marker.enableDragging();
+    var point_marker = createMarker(point, clr);
 
-  GEvent.addListener(point_marker, "drag", function() {
-    var index = findMarkerIndex(point_marker);
+    google.maps.event.addListener(point_marker, "drag", function(event) {
+        var index = findMarkerIndex(point_marker);
 
-    if (index >= 0) {
-      var nLat = point_marker.getPoint().lat();
-      var nLng = point_marker.getPoint().lng();
+        if (index >= 0) {
+            var nLat = event.latLng.lat();
+            var nLng = event.latLng.lng();
 
-      var pLevel = points[index].Level;
+            var pLevel = points[index].Level;
 
-      var modifiedPoint = {
-        Latitude: nLat,
-        Longitude: nLng,
-        Level: pLevel
-      };
+            var modifiedPoint = {
+                Latitude: nLat,
+                Longitude: nLng,
+                Level: pLevel
+            };
 
-      points[index] = modifiedPoint;
-      createEncodings(false);
-      document.getElementById('pointList').options[index]
-        = new Option('(' + nLat + ',' + nLng + ')', index);
-    }
-  });
+            points[index] = modifiedPoint;
+            createEncodings(false);
+            document.getElementById('pointList').options[index]
+            = new Option(nLat + ',' + nLng, index);
 
-  GEvent.addListener(point_marker, "click", function() {
-    highlight(findMarkerIndex(point_marker));
-  });
+        // = new Option('(' + nLat + ',' + nLng + ')', index);
+        }
+    });
 
-  return point_marker;
+    google.maps.event.addListener(point_marker, "click", function() {
+        highlight(findMarkerIndex(point_marker));
+    });
+
+    return point_marker;
 }
+
 
 // Add an option to the points list with the specified information.
 function addPointItem(lat, lng, pLevel) {
-  var displayPoint = new Option('(' + lat + ',' + lng + ')', points.length);
-  document.getElementById('pointList').options.add(displayPoint);
+    var displayPoint = new Option(lat + ',' + lng, points.length);
+    //var displayPoint = new Option('(' + lat + ',' + lng + ')', points.length);
+    document.getElementById('pointList').options.add(displayPoint);
 }
+
 
 // Highlights the point specified by index in both the map and the point list.
 function highlight(index) {
-  var pointList = document.getElementById('pointList');
+    var pointList = document.getElementById('pointList');
 
-  if (index < pointList.length) {
-    pointList.selectedIndex = index;
-  }
-
-  if (point_markers[index] != null
-      && point_markers[index] != highlighted_marker) {
-    document.map.removeOverlay(point_markers[index]);
-  }
-
-  if (highlighted_marker != null) {
-    var oldIndex = findMarkerIndex(highlighted_marker);
-    document.map.removeOverlay(highlighted_marker);
-
-    if (oldIndex != index) {
-      point_markers[oldIndex]
-        = createPointMarker(highlighted_marker.getPoint(), false);
-      document.map.addOverlay(point_markers[oldIndex]);
+    if (index < pointList.length) {
+        pointList.selectedIndex = index;
     }
-  }
 
-  highlighted_marker = createPointMarker(point_markers[index].getPoint(),
-                                         true);
-  point_markers[index] = highlighted_marker;
-  document.map.addOverlay(highlighted_marker);
+    if (point_markers[index] != null
+        && point_markers[index] != highlighted_marker) {
+        point_markers[index].setMap(null);
+    }
+
+    if (highlighted_marker != null) {
+        var oldIndex = findMarkerIndex(highlighted_marker);
+        highlighted_marker.setMap(null)
+
+        if (oldIndex != index) {
+            point_markers[oldIndex]
+            = createPointMarker(highlighted_marker.getPosition(), false);
+        }
+    }
+
+    highlighted_marker = createPointMarker(point_markers[index].getPosition(),
+        true);
+    point_markers[index] = highlighted_marker;
 }
 
-// Encode a signed number in the encode format.
-function encodeSignedNumber(num) {
-  var sgn_num = num << 1;
-
-  if (num < 0) {
-    sgn_num = ~(sgn_num);
-  }
-
-  return(encodeNumber(sgn_num));
-}
-
-// Encode an unsigned number in the encode format.
-function encodeNumber(num) {
-  var encodeString = "";
-
-  while (num >= 0x20) {
-    encodeString += (String.fromCharCode((0x20 | (num & 0x1f)) + 63));
-    num >>= 5;
-  }
-
-  encodeString += (String.fromCharCode(num + 63));
-  return encodeString;
-}
 
 // Delete *all* the points from the polyline, with confirmation dialog before
 // deletion.
 function deleteAllPoints() {
-  var deleteConfirm = confirm("Êtes vous sur de vouloir effacer tous les points ?");
+    //var deleteConfirm = confirm("Êtes vous sur de vouloir effacer tous les points ?");
 
-  if (deleteConfirm) {
-    document.getElementById('pointList').options.length = 0;
-    points = [];
-    deleteAllMarkers();
-    createEncodings();
-  }
+    //if (deleteConfirm) {
+        document.getElementById('pointList').options.length = 0;
+        points = [];
+        deleteAllMarkers();
+        createEncodings();
+    //}
 }
+
 
 // Deletes all the markers for the points in the polyline
 function deleteAllMarkers() {
-  for(var i = 0; i < point_markers.length; ++i) {
-    document.map.removeOverlay(point_markers[i]);
-  }
+    for(var i = 0; i < point_markers.length; ++i) {
+        point_markers[i].setMap(null)
+    }
 
-  point_markers = [];
-  highlighted_marker = null;
+    point_markers = [];
+    highlighted_marker = null;
 }
+
 
 // Delete a point from the polyline.
 function deletePoint()
-  {
-  if (points.length > 0)
+{
+    if (points.length > 0)
     {
-    var point_index = document.getElementById('pointList').selectedIndex;
+        var point_index = document.getElementById('pointList').selectedIndex;
 
-    if (point_index >= 0 && point_index < points.length)
-      {
-      points.splice(point_index, 1);
-
-      if (highlighted_marker == point_markers[point_index])
+        if (point_index >= 0 && point_index < points.length)
         {
-        highlighted_marker = null;
+            points.splice(point_index, 1);
+
+            if (highlighted_marker == point_markers[point_index])
+            {
+                highlighted_marker = null;
+            }
+
+            point_markers[point_index].setMap(null)
+            point_markers.splice(point_index, 1);
+            document.getElementById('pointList').options[point_index] = null;
+            createEncodings();
         }
 
-      document.map.removeOverlay(point_markers[point_index]);
-      point_markers.splice(point_index, 1);
-      document.getElementById('pointList').options[point_index] = null;
-      createEncodings();
-      }
+        if (points.length > 0) {
+            if (point_index == 0) {
+                point_index++;
+            }
 
-    if (points.length > 0) {
-      if (point_index == 0) {
-        point_index++;
-      }
-
-      highlight(point_index - 1);
+            highlight(point_index - 1);
+        }
     }
-  }
 }
 
-// Try to encode an unsigned number. Used by the documentation.
-function tryEncode() {
-  var txtValue = document.getElementById('txtNumber').value;
-  if (parseInt(txtValue).toString() == txtValue) {
-    document.getElementById('cdeValue').innerHTML
-      = encodeNumber(parseInt(txtValue));
-  }else{
-    document.getElementById('cdeValue').innerHTML = '(None)';
-  }
-}
-
-// Try to encode a signed number. Used by the documentation.
-function trySignEncode() {
-  var txtValue = document.getElementById('txtSignNumber').value;
-  if (parseInt(txtValue).toString() == txtValue) {
-    document.getElementById('cdeSignValue').innerHTML
-      = encodeSignedNumber(parseInt(txtValue));
-  }else{
-    document.getElementById('cdeSignValue').innerHTML = '(None)';
-  }
-}
 
 // Create the encoded polyline and level strings. If moveMap is true
 // move the map to the location of the first point in the polyline.
 function createEncodings(moveMap) {
-  var i = 0;
+    var i = 0;
 
-  var plat = 0;
-  var plng = 0;
+    // move if moveMap is true.
+    if (moveMap) {
+        map.setCenter(
+            new google.maps.LatLng(points[0].Latitude, points[0].Longitude),
+            map.getZoom());
+    }
+    coordinates = []
+    for(i = 0; i < points.length; ++i) {
+        coordinates[i] = new google.maps.LatLng(points[i].Latitude, points[i].Longitude)
+    }
+    if(polyline){
+        polyline.setMap(null)
+    }
+    if (points.length > 1) {
+        polyline = new google.maps.Polyline({
+            path: coordinates,
+            strokeColor: "#0000FF",
+            strokeOpacity: 1.0,
+            strokeWeight: 2,
+            map: map
+        });
+    }
 
-  var encoded_points = "";
-  var encoded_levels = "";
-
-  for(i = 0; i < points.length; ++i) {
-    var point = points[i];
-    var lat = point.Latitude;
-    var lng = point.Longitude;
-    var level = point.Level;
-
-    var late5 = Math.floor(lat * 1e5);
-    var lnge5 = Math.floor(lng * 1e5);
-
-    dlat = late5 - plat;
-    dlng = lnge5 - plng;
-
-    plat = late5;
-    plng = lnge5;
-
-    encoded_points += encodeSignedNumber(dlat) + encodeSignedNumber(dlng);
-    encoded_levels += encodeNumber(level);
-  }
-
-  // move if moveMap is true.
-  if (moveMap) {
-    document.map.setCenter(
-        new GLatLng(points[0].Latitude, points[0].Longitude),
-        document.map.getZoom());
-  }
-
-  document.getElementById('encodedLevels').value = encoded_levels;
-  document.getElementById('encodedPolyline').value = encoded_points;
-
-  if (document.overlay) {
-    document.map.removeOverlay(document.overlay);
-  }
-
-  if (points.length > 1) {
-    document.overlay = GPolyline.fromEncoded({color: "#0000FF",
-                                              weight: 10,
-                                              points: encoded_points,
-                                              zoomFactor: 32,
-                                              levels: encoded_levels,
-                                              numLevels: 4
-                                             });
-
-    document.map.addOverlay(document.overlay);
-  }
 }
 
 function centerMap() {
-  var address = document.getElementById('txtAddress').value;
+    var address = document.getElementById('txtAddress').value;
+    if (search_point) search_point.setMap(null);
+    if (address.length > 0) {
+        var geocoder = new google.maps.Geocoder();
 
-  if (address.length > 0) {
-    var geocoder = new GClientGeocoder();
-
-    geocoder.getLatLng(address,
-      function(point) {
-        if (!point) {
-          alert('Address "' + address + '" not found');
-        } else {
-          document.map.setCenter(point, 13);
-        }
-      });
-  }
-}
-
-// Decode an encoded polyline into a list of lat/lng tuples.
-function decodeLine (encoded) {
-  var len = encoded.length;
-  var index = 0;
-  var array = [];
-  var lat = 0;
-  var lng = 0;
-
-  while (index < len) {
-    var b;
-    var shift = 0;
-    var result = 0;
-    do {
-      b = encoded.charCodeAt(index++) - 63;
-      result |= (b & 0x1f) << shift;
-      shift += 5;
-    } while (b >= 0x20);
-    var dlat = ((result & 1) ? ~(result >> 1) : (result >> 1));
-    lat += dlat;
-
-    shift = 0;
-    result = 0;
-    do {
-      b = encoded.charCodeAt(index++) - 63;
-      result |= (b & 0x1f) << shift;
-      shift += 5;
-    } while (b >= 0x20);
-    var dlng = ((result & 1) ? ~(result >> 1) : (result >> 1));
-    lng += dlng;
-
-    array.push([lat * 1e-5, lng * 1e-5]);
-  }
-
-  return array;
-}
-
-// Decode an encoded levels string into a list of levels.
-function decodeLevels(encoded) {
-  var levels = [];
-
-  for (var pointIndex = 0; pointIndex < encoded.length; ++pointIndex) {
-    var pointLevel = encoded.charCodeAt(pointIndex) - 63;
-    levels.push(pointLevel);
-  }
-
-  return levels;
-}
-
-// Decode the supplied encoded polyline and levels.
-function decode() {
-  var encoded_points = document.getElementById('encodedPolyline').value;
-  var encoded_levels = document.getElementById('encodedLevels').value;
-
-  if (encoded_points.length==0 || encoded_levels.length==0) {
-    return;
-  }
-
-  var enc_points = decodeLine(encoded_points);
-  var enc_levels = decodeLevels(encoded_levels);
-
-  if (enc_points.length==0 || enc_levels.length==0) {
-    return;
-  }
-
-  if (enc_points.length != enc_levels.length) {
-    alert('Point count and level count do not match');
-    return;
-  }
-
-  deleteAllMarkers();
-  document.getElementById('pointList').options.length = 0;
-  points = [];
-
-  for (var i = 0; i < enc_points.length; ++i) {
-    createPoint(enc_points[i][0], enc_points[i][1], enc_levels[i]);
-  }
-
-  createEncodings(true);
-}
-
-
-
-//#########################################################################
-
-// These functions decode a polyline pointstring.
-// The first is mine and simply links the second function to the form.
-function decode2box ()
-  {
-  var instring;
-  var outstring;
-  var points;
-
-  instring = document.getElementById("encodedPolyline").value;
-  instring = instring.replace(/\\\\/g, "\\");
-  points = decodeLine(instring);
-  outstring = "";
-  for(i=0; i < points.length; i++)
-    {
-    outstring = outstring + '(' + points[i][0] + ", " + points[i][1] + ")\n";
+        geocoder.geocode({
+            'address': address
+        },
+        function(results, status) {
+            if (status == google.maps.GeocoderStatus.OK) {
+                map.setCenter(results[0].geometry.location);
+                search_point = createMarker(results[0].geometry.location, 'red')
+                search_proximity_area(results[0].geometry.location)
+            }
+        });
     }
-  document.getElementById("ListeDePoints").value = outstring;
-  }
-
-
-//#########################################################################
+}
 
 
 function createMarker(point, color) {
-  var f = new GIcon();
-  f.image = "http://labs.google.com/ridefinder/images/mm_20_" + color
-            + ".png";
-  f.shadow = "http://labs.google.com/ridefinder/images/mm_20_shadow.png";
-  f.iconSize = new GSize(12,20);
-  f.shadowSize = new GSize(22,20);
-  f.iconAnchor = new GPoint(6,20);
-  f.infoWindowAnchor = new GPoint(6,1);
-  f.infoShadowAnchor = new GPoint(13,13);
+    var image = new google.maps.MarkerImage("http://labs.google.com/ridefinder/images/mm_20_" + color + ".png",
+        new google.maps.Size(12, 20),
+        new google.maps.Point(0,0),
+        new google.maps.Point(6, 20)
+        )
+    var shadow = new google.maps.MarkerImage( "http://labs.google.com/ridefinder/images/mm_20_shadow.png",
+        new google.maps.Size(22, 20),
+        new google.maps.Point(0,0),
+        new google.maps.Point(6, 20)
+        )
+    var shape = {
+        coord: [1, 1, 1, 20, 18, 20, 18 , 1],
+        type: 'poly'
+    };
+    var newMarker = new google.maps.Marker({
+        position: point,
+        map: map,
+        shadow: shadow,
+        icon: image,
+        shape: shape,
+        draggable: true
+    });
 
-  newMarker = new GMarker(point,
-    {icon: f,
-     draggable: true});
-
-  return newMarker;
+    return newMarker;
 }
 
 // Create the Google Map to be used.
 function createMap() {
-  if (!GBrowserIsCompatible()) {
-    alert('Your browser is not compatible with the Google Maps API');
-    return;
-  }
+    var latlng = new google.maps.LatLng(45.76201437142477, 4.834842681884766);
 
-  document.map = new GMap2(document.getElementById("map_canvas"));
-  document.map.setCenter(new GLatLng(45.76201437142477, 4.834842681884766), 15);
-  document.map.addControl(new GSmallMapControl());
-  document.map.addControl(new GMapTypeControl());
-document.map.enableScrollWheelZoom();
-  GEvent.addListener(document.map, "click", function(overlay, point) {
-    document.getElementById('txtLatitude').value = point.y;
-    document.getElementById('txtLongitude').value = point.x;
+    var myOptions =
+    {
+        zoom: 15,
+        center: latlng,
+        mapTypeId: google.maps.MapTypeId.ROADMAP
+    };
+    map = new google.maps.Map(document.getElementById("map_canvas"), myOptions);
 
-    if (marker == null) {
-      marker = createMarker(point, "green");
-      marker.enableDragging();
+    google.maps.event.addListener(map, "click", function(event) {
+        document.getElementById('txtLatitude').value = event.latLng.lat();
+        document.getElementById('txtLongitude').value = event.latLng.lng();
+        
+        if (marker == null) {
+            
+            marker = createMarker(event.latLng, "green");
+            
 
-      GEvent.addListener(marker, "drag", function() {
-        document.getElementById('txtLatitude').value = marker.getPoint().y;
-        document.getElementById('txtLongitude').value = marker.getPoint().x;
-      });
+            google.maps.event.addListener(marker, "drag", function(event) {
+                document.getElementById('txtLatitude').value = event.latLng.lat();
+                document.getElementById('txtLongitude').value = event.latLng.lng();
+            });
+        } else {
+            marker.setPosition(event.latLng);
+        }
 
-      document.map.addOverlay(marker);
-    } else {
-      marker.setPoint(point);
-    }
-  });
+    })
+
+
 }
+
 
 // Move the map to the selected point in the point list.
 function jumpToPoint() {
-  var pointList = document.getElementById('pointList');
-  if (pointList.selectedIndex >= 0) {
-    var point = points[pointList.selectedIndex];
-    document.map.setCenter(new GLatLng(point.Latitude, point.Longitude),
-                           document.map.getZoom());
-  }
+    var pointList = document.getElementById('pointList');
+    if (pointList.selectedIndex >= 0) {
+        var point = points[pointList.selectedIndex];
+        map.setCenter(new google.maps.LatLng(point.Latitude, point.Longitude), 
+            map.getZoom());
+    }
+}
+
+
+function sendPoints(){
+    val = ""
+    for(i = 0; i < $("#pointList")[0].options.length; i++){
+        val += $("#pointList")[0].options[i].innerHTML
+        if(i < $("#pointList")[0].options.length -1) val += ";";
+    }
+    $("#area_points_list")[0].value = val
+    $("#area_form")[0].submit()
+}
+
+function drawArea(points_ary, area_id){
+    coordinates = []
+    for (i=0; i<points_ary.length; i++){
+        coordinates[i] = new google.maps.LatLng(points_ary[i][0], points_ary[i][1]);
+    }
+    coordinates[points_ary.length] = new google.maps.LatLng(points_ary[0][0], points_ary[0][1]);
+
+    var monpolygone = new google.maps.Polygon({
+        paths: coordinates,
+        strokeColor: "#990000",
+        strokeOpacity: 1,
+        strokeWeight: 1,
+        fillColor: "#ff0000",
+        fillOpacity: 0.2,
+        map: map
+    })
+    google.maps.event.addListener(monpolygone, "click", function(event){
+        remote_edition(area_id)
+    })
+    areas.push(monpolygone)
+    index_areas.push(area_id)
+
+}
+
+function addPointsFromList(point_list){
+    ary_points = point_list.split(";")
+    for (i=0; i<ary_points.length; i++){
+
+        coordinates = ary_points[i].split(",")
+        createPoint(coordinates[0], coordinates[1], 3);
+        createEncodings(false);
+
+    }
+
+}
+
+function remote_edition(area_id){
+    $.ajax({
+        url: "/areas/" + area_id + "/edit.js",
+        dataType: "html",
+        success: function(html){
+            datas = html.split("########################")
+            $("#area_block")[0].innerHTML = datas[0]
+            deleteAllPoints();
+            addPointsFromList(datas[2]);
+        },
+        error: function(data, test, error){ alert("error" + test + " ### "+ error)}
+    });
+}
+
+function search_proximity_area(point_to_search){
+    $.ajax({
+        url: "/areas/proximity_area.js",
+        data: "latitude="+point_to_search.lat()+"&longitude="+point_to_search.lng(),
+        dataType: "html",
+        success: function(html){
+            alert(html)
+        },
+        error: function(data, test, error){ alert("error" + test + " ### "+ error)}
+    });
 }

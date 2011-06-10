@@ -1,0 +1,54 @@
+<% content_for :current_page, :home %>
+
+<table cellpadding="5" cellspacing="0" border="0" width="100%" >
+  <tbody>
+    <tr>
+      <td align="left" valign="top" class="just">
+        <table>
+          <tbody><tr valign="top">
+              <td>
+                <form method="post" action="javascript:void(0)" onsubmit="centerMap()">Centrer la carte sur :<br>(Il est conseillé de taper le nom d'une ville et du pays en anglais<br>Ex : Mons Belgium)<br><input type="text" id="txtAddress" value="15 rue de la république 69002 lyon"><input type="submit" value="Recherche"></form>
+                <div id="map_canvas" style="position: relative; background-color: rgb(229, 227, 223);" style="width: 1000px; height: 800px"></div>
+              </td>
+              <td style="padding-left:20px">
+                <table>
+                  <tbody><tr><td align="right">Latitude :</td><td><input id="txtLatitude" type="text" class="inputField"></td></tr>
+                    <tr><td align="right">Longitude :</td><td><input id="txtLongitude" type="text" class="inputField"></td></tr>
+                    <tr><td align="right"><!--Niveau min zoom :-->&nbsp;</td><td><!--<input id="txtLevel" type="text" size="3" value="3"/>-->
+                        <input id="txtLevel" type="hidden" value="3"><input type="button" value="Ajout point" onclick="addPoint()"></td></tr>
+                    <tr><td colspan="2" align="right"></td></tr>
+                  </tbody>
+                </table>
+                <br>
+                <div id="area_block">
+                  <%= render :partial => "area" %>
+                </div>
+              </td>
+            </tr>
+          </tbody></table>
+
+
+      </td>
+
+
+    </tr>
+  </tbody>
+</table>
+<script type="text/javascript">
+
+  $(document).ready(function(){
+    createMap()
+
+<% @areas.each do |area| %>
+  <% if @area.id != area.id %>
+        drawArea(<%= area.get_ary_points %>, <%= area.id %> )
+  <% end %>
+<% end %>
+<% if !@points_list.blank? %>
+      addPointsFromList('<%= @points_list %>');
+<% end %>
+  });
+
+</script>
+
+

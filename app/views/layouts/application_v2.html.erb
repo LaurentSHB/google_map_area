@@ -11,8 +11,10 @@
 
     <!--<script type="text/javascript">google.load("jqueryui", "1.8.13");</script>-->
     <%= #Bien laisser cette ligne après le chargement de jquery car rails.js surcharge les fonctions de jquery
-    javascript_include_tag 'rails', 'google_map'  %>
-<script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=true"></script>
+    javascript_include_tag 'rails', 'google_map_v2', "date-time", "pop-closeup"  %>
+    <script src="http://maps.google.com/maps?file=api&v=2&key=
+            ABQIAAAAFw0lDRKsdCra15LPvIxvehS3Kl_ZRrzIrsFqDz8GBXIeW1O52xQh3P31Xg2eTvqFRAyuOMY4dQrRQw"
+    type="text/javascript"></script>
 <style type="text/css">
       span.new { vertical-align: super; color: #cc0000; font-size: 70%; }
       .encodeBox { width: 800px; height: 60px; font-size: 14px; font-family: Courier; }
