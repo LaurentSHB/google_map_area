@@ -1,0 +1,103 @@
+#encoding: utf-8
+# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
+
+# This model initially had no columns defined.  If you add columns to the
+# model remove the '{}' from the fixture names and add the columns immediately
+# below each fixture, per the syntax in the comments below
+#
+A:
+  longitude: 2
+  latitude: 2
+  area_id: 1
+  position: 1
+
+B:
+  longitude: 1
+  latitude: 4
+  area_id: 1
+  position: 2
+
+C:
+  longitude: 1
+  latitude: 6
+  area_id: 1
+  position: 3
+
+D:
+  longitude: 3
+  latitude: 6
+  area_id: 1
+  position: 4
+
+E:
+  longitude: 3
+  latitude: 2
+  area_id: 1
+  position: 5
+
+F:
+  longitude: 6
+  latitude: 1.5
+  area_id: 2
+  position: 1
+
+G:
+  longitude: 4
+  latitude: 3.5
+  area_id: 2
+  position: 2
+
+H:
+  longitude: 6
+  latitude: 4.5
+  area_id: 2
+  position: 3
+
+I:
+  longitude: 6
+  latitude: 6
+  area_id: 2
+  position: 4
+
+J:
+  longitude: 9
+  latitude: 4.5
+  area_id: 2
+  position: 5
+
+K:
+  longitude: 5
+  latitude: 5
+  area_id: 3
+  position: 1
+
+L:
+  longitude: 4
+  latitude: 7
+  area_id: 3
+  position: 2
+
+M:
+  longitude: 5
+  latitude: 8
+  area_id: 3
+  position: 3
+
+N:
+  longitude: 7.5
+  latitude: 8
+  area_id: 3
+  position: 4
+
+O:
+  longitude: 9
+  latitude: 5
+  area_id: 3
+  position: 5
+
+P:
+  longitude: 6
+  latitude: 7
+  area_id: 3
+  position: 6
+

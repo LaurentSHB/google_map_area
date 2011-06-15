@@ -1,0 +1,19 @@
+#encoding: utf-8
+# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
+
+# This model initially had no columns defined.  If you add columns to the
+# model remove the '{}' from the fixture names and add the columns immediately
+# below each fixture, per the syntax in the comments below
+#
+area_one:
+  id: 1
+  title: area_1
+
+area_two:
+  id: 2
+  title: area_2
+
+area_three:
+  id: 3
+  title: area_3
+

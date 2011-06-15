@@ -51,14 +51,15 @@ class AreasController < ApplicationController
   end
 
   def proximity_area
-    @area, approximation = Area.get_since_point(params[:latitude], params[:longitude])
+
+    @area, distance = Area.get_close_to_point(params[:latitude].to_f, params[:longitude].to_f)
     respond_with(@area) do |format|
       format.html{
         @areas = Area.all
         @points_list = @area.get_str_points
         render :index
       }
-      format.js{ render :text => "#{@area.id} => #{@area.title} => #{approximation ? "APPROXIMATION" : "IN" }" }
+      format.js{ render :text => "#{@area.id} => #{@area.title} => #{distance}" }
     end
   end
 
